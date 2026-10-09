@@ -1,0 +1,8 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/testdb
+    username: test
+    password: test
+    hikari:
+      initialization-fail-timeout: -1
+      connection-timeout: 3000
