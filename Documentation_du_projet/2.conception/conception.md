@@ -4,7 +4,7 @@
 
 **PromoManager** est un moteur de promotions B2B destiné aux commerces (e-commerce et boutiques physiques), édité par **Marne Tech**. Il centralise trois leviers de fidélisation client — programme de points, codes promo, cartes cadeaux — pilotables depuis un Dashboard marchand, avec un Espace Client dédié pour les clients finaux.
 
-Le détail du besoin, du périmètre et des contraintes est formalisé dans le [cahier des charges](../Docs/cahier-des-charges.pdf).
+Le détail du besoin, du périmètre et des contraintes est formalisé dans le [cahier des charges](../1.cadrage/cahier-des-charges-v2.md).
 
 ## 2. Méthodologie de développement
 
@@ -28,6 +28,8 @@ La conception de promo manager est découpée en modules :
 | **Codes promo**    | Création, suivi, désactivation et application de codes de réduction                           |
 | **Cartes cadeaux** | Génération, vente (Stripe), consultation de solde                                             |
 | **Dashboard**      | Point d'entrée marchand regroupant la configuration et la supervision des 4 modules ci-dessus |
+
+Le Dashboard (marchand) et l'Espace Client sont servis par **deux applications Angular distinctes** (`Dashboard/` et `Client/`), chacune consommant la même API Spring Boot. Elles ne partagent ni code ni déploiement — seulement le contrat d'API. Voir § 7 pour l'architecture détaillée.
 
 ## 4. Acteurs et concepts
 
@@ -164,8 +166,8 @@ flowchart LR
 | Composant         | Choix                   |
 | ----------------- | ----------------------- |
 | Backend           | Java + Spring Boot      |
-| Frontend          | Angular                 |
-| Base de données   | SGBD relationnel        |
+| Frontend          | Angular — 2 applications distinctes : `Dashboard` (marchand), `Client` (espace client) |
+| Base de données   | PostgreSQL              |
 | Paiement          | Stripe (mode test)      |
 | Conteneurisation  | Docker + docker-compose |
 | CI/CD             | GitHub Actions          |
@@ -176,24 +178,26 @@ flowchart LR
 ```mermaid
 flowchart TB
     subgraph Navigateur["Navigateur"]
-        FE[Angular SPA]
+        FE1[Angular SPA — Dashboard Marchand]
+        FE2[Angular SPA — Espace Client]
     end
 
     subgraph Compose["docker-compose"]
         BE[API Spring Boot]
-        DB[(Base de données relationnelle)]
+        DB[(PostgreSQL)]
     end
 
     Stripe[/Stripe API/]
 
-    FE -->|HTTP REST / JSON| BE
+    FE1 -->|HTTP REST / JSON| BE
+    FE2 -->|HTTP REST / JSON| BE
     BE -->|JDBC| DB
     BE -->|Paiement + webhook| Stripe
 ```
 
-- Le **frontend Angular** consomme l'API REST exposée par le backend Spring Boot (API ouverte, sans JWT).
+- **Deux frontends Angular indépendants** — `Dashboard` (marchand) et `Client` (espace client) — consomment la même API REST exposée par le backend Spring Boot, authentifiée par JWT.
 - Le **backend** porte toute la logique métier (fidélité, codes promo, cartes cadeaux) et communique avec Stripe pour les paiements de cartes cadeaux (mode test).
-- Les trois services (frontend, backend, base de données) sont orchestrés via **docker-compose** pour un déploiement reproductible.
+- Les quatre services (2 frontends, backend, base de données) sont orchestrés via **docker-compose** pour un déploiement reproductible.
 
 ## 8. Modèle de données
 

@@ -17,7 +17,7 @@ Ce projet est réalisé dans le cadre de l'évaluation RNCP 35419 - Niveau 7 (Ex
 | Composant | Technologie |
 |---|---|
 | Backend | Java + Spring Boot |
-| Frontend | Angular |
+| Frontend | Angular — 2 applications distinctes : `Dashboard` (marchand), `Client` (espace client) |
 | Base de données | PostgreSQL |
 | Paiement | Stripe (mode test) |
 | CI/CD | GitHub Actions |
@@ -60,11 +60,13 @@ Convention de commits : [Conventional Commits](https://www.conventionalcommits.o
 / -- API/promo_manager_api/     (backend Spring Boot)
 / -- bdd/schema base de données.pdf
 / -- bdd/script.sql
-/ -- frontend/
+/ -- Dashboard/                 (frontend Angular — marchand)
+/ -- Client/                    (frontend Angular — espace client)
 / -- couverture/rapport-backend/
 / -- couverture/rapport-frontend/
 / -- Dockerfile.backend
-/ -- Dockerfile.frontend
+/ -- Dockerfile.dashboard
+/ -- Dockerfile.client
 / -- docker-compose.yml
 / -- .env.example
 / -- readme.md
@@ -93,21 +95,47 @@ cd API/promo_manager_api
 
 Sans PostgreSQL démarré, l'application démarre quand même (pas de crash) et `GET http://localhost:8080/actuator/health` renvoie `DOWN` tant que la base n'est pas joignable.
 
-### Stack complète (API + PostgreSQL) via Docker
+### Stack complète (Dashboard + Client + API + PostgreSQL) via Docker
 
 ```bash
 cp .env.example .env   # première fois seulement
 docker compose up --build
 ```
 
-Démarre un conteneur PostgreSQL (healthcheck `pg_isready`) puis l'API une fois la base prête (profil `docker`, connexion via les variables d'environnement définies dans `docker-compose.yml`). Vérifier avec :
+Démarre 4 conteneurs : PostgreSQL (healthcheck `pg_isready`), l'API une fois la base prête (profil `docker`), puis les deux frontends Angular (buildés avec `--configuration=docker`, servis par Nginx) :
+
+| Service | URL |
+|---|---|
+| Dashboard (marchand) | http://localhost:4200 |
+| Client (espace client) | http://localhost:4201 |
+| API | http://localhost:8080 |
+
+Vérifier avec :
 
 ```bash
 curl http://localhost:8080/actuator/health
 # {"groups":["liveness","readiness"],"status":"UP"}
 ```
 
+Les deux frontends affichent aussi ce statut à l'écran (Dashboard : bas de la sidebar — Client : en-tête).
+
 Pour tout arrêter : `docker compose down` (ajouter `-v` pour supprimer aussi le volume de données Postgres).
+
+### Frontend seul, en local (sans Docker)
+
+Chaque application se lance indépendamment, hors conteneur :
+
+```bash
+cd Dashboard
+npm start          # http://localhost:4200
+```
+
+```bash
+cd Client
+npm start -- --port 4201   # les deux apps démarrent sur le port 4200 par défaut
+```
+
+Les deux affichent un statut `Backend : UP/DOWN` qui interroge `GET /actuator/health` sur l'API en `localhost:8080`. Sans l'API démarrée, le statut reste sur `DOWN` — c'est attendu, l'app ne plante pas pour autant.
 
 ## Procédure de déploiement
 
