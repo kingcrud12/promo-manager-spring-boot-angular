@@ -148,9 +148,9 @@ PromoManager est un projet neuf : il n'y a pas de système existant à reprendre
 | | | |
 |---|---|---|
 | **Backend** | Langage / Framework | Java + Spring Boot |
-| | Base de données | SGBD relationnel |
+| | Base de données | PostgreSQL |
 | | Versionning | GitHub |
-| **Frontend** | Framework | Angular |
+| **Frontend** | Framework | Angular — 2 applications distinctes : `Dashboard` (marchand), `Client` (espace client) |
 | | Versionning | GitHub |
 | **Paiement** | Fournisseur | Stripe (mode test) |
 | **Conteneurisation** | Outils | Docker / docker-compose |

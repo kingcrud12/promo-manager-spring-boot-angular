@@ -1,0 +1,15 @@
+# ---- Build ----
+FROM node:24.21.0-alpine AS build
+WORKDIR /app
+
+COPY Dashboard/package*.json ./
+RUN npm ci
+
+COPY Dashboard/ ./
+RUN npx ng build --configuration=docker
+
+# ---- Runtime ----
+FROM nginx:alpine
+COPY --from=build /app/dist/dashboard/browser /usr/share/nginx/html
+
+EXPOSE 80

@@ -1,0 +1,32 @@
+<div class="layout">
+  <header class="tabs">
+    <h1>Espace Client</h1>
+    <span class="backend-status">Backend : {{ backendStatus() }}</span>
+    <button type="button" (click)="showSection('informations')"
+            [class.active]="activeSection() === 'informations'">
+      Informations personnelles
+    </button>
+    <button type="button" (click)="showSection('points')"
+            [class.active]="activeSection() === 'points'">
+      Mes points
+    </button>
+    <button type="button" (click)="showSection('cartes-cadeaux')"
+            [class.active]="activeSection() === 'cartes-cadeaux'">
+      Mes cartes cadeaux
+    </button>
+  </header>
+
+  <main class="content">
+    @switch (activeSection()) {
+      @case ('informations') {
+        <app-informations-personnelles />
+      }
+      @case ('points') {
+        <app-solde-points />
+      }
+      @case ('cartes-cadeaux') {
+        <app-cartes-cadeaux />
+      }
+    }
+  </main>
+</div>
