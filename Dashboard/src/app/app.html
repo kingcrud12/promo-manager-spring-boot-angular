@@ -1,0 +1,17 @@
+<div class="layout">
+  <nav class="sidebar">
+    <h1>PromoManager</h1>
+    <a routerLink="/clients" routerLinkActive="active">Clients</a>
+    <a routerLink="/fidelite" routerLinkActive="active">Programme de fidélité</a>
+    <a routerLink="/codes-promo" routerLinkActive="active">Codes promo</a>
+    <a routerLink="/cartes-cadeaux" routerLinkActive="active">Cartes cadeaux</a>
+    <a routerLink="/reglages" routerLinkActive="active">Réglages</a>
+    <a routerLink="/compte" routerLinkActive="active">Compte</a>
+
+    <p class="backend-status">Backend : {{ backendStatus() }}</p>
+  </nav>
+
+  <main class="content">
+    <router-outlet></router-outlet>
+  </main>
+</div>
